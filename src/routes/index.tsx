@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clock, MapPin, Sofa as SofaIcon, Ticket } from "lucide-react";
-import hero from "@/assets/hero.jpg";
+import { EventCarousel } from "@/components/EventCarousel";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useApp } from "@/lib/store";
@@ -28,6 +28,7 @@ function Home() {
   const { state } = useApp();
   const [collective, setCollective] = useState("semua");
   const [date, setDate] = useState("");
+  const [tab, setTab] = useState<"grup" | "event">("grup");
   const match = (e: { collectiveId: string; date: string }) => (collective === "semua" || e.collectiveId === collective) && (!date || e.date === date);
   const events = state.events
     .filter((e) => e.status !== "draft" && match(e))
@@ -39,15 +40,12 @@ function Home() {
 
   return (
     <div className="space-y-6">
-      {/* Panel kaca mengambang di atas foto: foto terlihat buram di balik teks. */}
-      <section className="relative overflow-hidden rounded-[1.75rem] shadow-[0_12px_40px_rgb(31_38_135/0.18)]">
-        <img src={hero} alt="Sofa club dengan lampu neon" width={1280} height={720} className="h-64 w-full object-cover sm:h-80" />
-        <div className="glass absolute inset-x-3 bottom-3 rounded-[1.4rem] p-4 sm:inset-x-4 sm:bottom-4 sm:p-5">
-          <span className="tag bg-primary text-primary-foreground">DIY · Jogja</span>
-          <h1 className="mt-2 text-2xl leading-tight sm:text-3xl">Patungan sofa, pesta tetap <span className="text-primary">mewah</span>.</h1>
-          <p className="mt-1 max-w-md text-sm text-foreground/70">Grup dibuka H-14, DP sampai H-7, pelunasan sampai H-3.</p>
-        </div>
-      </section>
+      {/* Section 1: event mendatang dalam carousel geser. */}
+      <div>
+        <h1 className="text-2xl leading-tight sm:text-3xl">Patungan sofa, pesta tetap <span className="text-primary">mewah</span>.</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Event collective di club DIY · grup dibuka H-14, DP H-7, lunas H-3.</p>
+        <EventCarousel />
+      </div>
 
       <div className="space-y-2">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
@@ -65,7 +63,17 @@ function Home() {
         </div>
       </div>
 
-      <section className="space-y-3">
+      {/* Kategori: pilih daftar grup yang masih butuh orang atau daftar event. */}
+      <div role="tablist" aria-label="Kategori" className="grid grid-cols-2 gap-1 rounded-full bg-black/[0.06] p-1">
+        {([["grup", "Grup butuh orang", openGroups.length], ["event", "Event", events.length]] as const).map(([id, label, n]) => (
+          <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
+            className={cn("h-10 rounded-full text-sm font-semibold transition", tab === id ? "bg-white text-foreground shadow-sm" : "text-foreground/60")}>
+            {label} <span className={cn("ml-1 rounded-full px-1.5 text-xs", tab === id ? "bg-primary text-primary-foreground" : "bg-black/10")}>{n}</span>
+          </button>
+        ))}
+      </div>
+
+      {tab === "grup" && <section className="space-y-3">
         <h2 className="text-sm">Grup yang masih butuh orang</h2>
         {openGroups.length === 0 && <p className="text-sm text-muted-foreground">Belum ada grup terbuka untuk filter ini.</p>}
         {openGroups.map(({ g, e }) => {
@@ -93,9 +101,9 @@ function Home() {
             </Link>
           );
         })}
-      </section>
+      </section>}
 
-      <section className="space-y-3">
+      {tab === "event" && <section className="space-y-3">
         <h2 className="text-sm">Event</h2>
         {events.length === 0 && <p className="text-sm text-muted-foreground">Belum ada event untuk filter ini.</p>}
         {events.map((e) => {
@@ -127,7 +135,7 @@ function Home() {
             </Link>
           );
         })}
-      </section>
+      </section>}
     </div>
   );
 }

@@ -93,12 +93,8 @@
   --glass-highlight: rgb(255 255 255 / 0.9);
   --glass-edge: rgb(0 0 0 / 0.09);
   --glass-shadow: 0 8px 32px rgb(0 0 0 / 0.1), 0 1px 3px rgb(0 0 0 / 0.06);
-  /* Latar berwarna lembut di belakang kaca, supaya efek buram dan pembiasannya terlihat. */
-  --mesh: radial-gradient(42% 34% at 10% 6%, rgb(0 122 255 / 0.32), transparent 70%),
-    radial-gradient(38% 30% at 94% 16%, rgb(255 55 95 / 0.26), transparent 70%),
-    radial-gradient(46% 38% at 84% 82%, rgb(175 82 222 / 0.24), transparent 70%),
-    radial-gradient(46% 40% at 6% 80%, rgb(48 209 188 / 0.24), transparent 70%),
-    linear-gradient(180deg, #f5f6fb 0%, #eceff7 100%);
+  /* Latar polos abu-abu terang ala iOS. */
+  --mesh: linear-gradient(#f2f2f7, #f2f2f7);
   --gradient-glow: radial-gradient(90% 50% at 0% 0%, rgb(0 122 255 / 0.07), transparent 60%),
     radial-gradient(70% 45% at 100% 0%, rgb(214 38 90 / 0.06), transparent 60%);
 }
