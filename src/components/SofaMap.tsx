@@ -1,7 +1,7 @@
 import { Armchair, Check, Disc3, Wine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { occupiedSlots } from "@/lib/sofa-selection";
+import { filledSlots, occupiedSlots } from "@/lib/sofa-selection";
 import type { Group, Sofa } from "@/lib/types";
 
 export function SofaMap({ sofas, groups, selectedId, onSelect, closed = false }: {
@@ -19,8 +19,8 @@ export function SofaMap({ sofas, groups, selectedId, onSelect, closed = false }:
         <div className="sofa-floor-grid">
           {sofas.map((sofa, index) => {
             const group = groups.find((g) => g.sofaId === sofa.id && g.status !== "BATAL");
-            const remaining = sofa.capacity - (group?.members.length ?? 0);
-            const blocked = closed || !sofa.active || remaining <= 0 || !!group && !["DP_BOOKING", "PELUNASAN"].includes(group.status);
+            const remaining = group ? group.slots - filledSlots(group) : sofa.capacity;
+            const blocked = (closed && !group) || remaining <= 0 || (!!group && !["DP_BOOKING", "PELUNASAN"].includes(group.status));
             return (
               <Button key={sofa.id} variant="ghost" aria-pressed={selectedId === sofa.id}
                 aria-label={`${sofa.name}, ${blocked ? "ditutup" : `${remaining} slot tersedia`}`}
@@ -28,7 +28,7 @@ export function SofaMap({ sofas, groups, selectedId, onSelect, closed = false }:
                 <span className="sofa-map-code">{String(index + 1).padStart(2, "0")}{selectedId === sofa.id && <Check className="h-3 w-3" />}</span>
                 <span className="sofa-shape" aria-hidden="true"><span /><span /><span /></span>
                 <span className="max-w-full whitespace-normal text-center text-xs font-semibold">{sofa.name}</span>
-                <span className="text-[11px] text-muted-foreground">{blocked ? "Tidak tersedia" : `${remaining}/${sofa.capacity} slot tersedia`}</span>
+                <span className="text-[11px] text-muted-foreground">{blocked ? "Tidak tersedia" : group ? `${remaining}/${group.slots} slot tersedia` : "Belum ada grup"}</span>
               </Button>
             );
           })}

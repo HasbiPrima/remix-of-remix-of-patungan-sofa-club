@@ -1,18 +1,18 @@
-import { filledSlots } from "@/lib/sofa-selection";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatGrid } from "@/components/StatGrid";
 import { StatusBadge } from "@/components/StatusBadge";
+import { EventManager } from "@/components/host/EventManager";
+import { FundsPanel, GroupList, ProposalList, RatingReport, ReferralManager } from "@/components/host/Panels";
 import { actions, useApp } from "@/lib/store";
-import { eventEnd, fmtEventDate, getEvent, getSofa, getVenue, lunasCount, rupiah } from "@/lib/rules";
-import type { Group } from "@/lib/types";
+import { eventEnd, fmtEventDate, getCollective, getVenue, rupiah } from "@/lib/rules";
+import { filledSlots } from "@/lib/sofa-selection";
 
 export const Route = createFileRoute("/host")({
   head: () => ({
     meta: [
       { title: "Dasbor Host — Sofamates" },
-      { name: "description", content: "Pantau penjualan, grup sofa, dan kelola event atau venue di Sofamates." },
+      { name: "description", content: "Kelola event, sofa, tiket, grup, pengajuan, referral, dan dana collective di Sofamates." },
       { property: "og:title", content: "Dasbor Host — Sofamates" },
       { property: "og:description", content: "Dasbor host collective dan host venue." },
       { property: "og:type", content: "website" },
@@ -22,12 +22,6 @@ export const Route = createFileRoute("/host")({
   component: HostPage,
 });
 
-const ACTIVE: Group["status"][] = ["DP_BOOKING", "PELUNASAN", "LUNAS"];
-/** Uang masuk (simulasi) dari sebuah grup: DP terbayar + pelunasan terbayar */
-const groupPaid = (g: Group) =>
-  g.status === "BATAL" ? 0
-    : (g.leaderPaidAllDp ? g.slots : filledSlots(g)) * g.dpPerSlot + lunasCount(g) * g.lunasPerSlot;
-
 function HostPage() {
   const { me } = useApp();
   if (me.role === "host_collective") return <CollectiveDash />;
@@ -36,95 +30,81 @@ function HostPage() {
 }
 
 function CollectiveDash() {
-  const { state, me, run } = useApp();
-  const events = state.events.filter((e) => e.hostId === me.id);
+  const { state, me } = useApp();
+  const events = state.events.filter((e) => e.collectiveId === me.collectiveId);
   const ids = new Set(events.map((e) => e.id));
-  const tickets = state.tickets.filter((t) => ids.has(t.eventId));
   const groups = state.groups.filter((g) => ids.has(g.eventId));
-  const upcoming = events.filter((e) => !e.cancelled && state.now <= eventEnd(e));
+  const pending = state.proposals.filter((p) => ids.has(p.eventId) && p.status === "menunggu").length;
+  const funds = events.reduce((a, e) => a + actions.eventFunds(state, e.id).toSend, 0);
   return (
     <div className="space-y-5">
       <div>
         <p className="text-xs text-muted-foreground">Dasbor Host Collective</p>
-        <h1 className="text-2xl">{me.name}</h1>
+        <h1 className="text-2xl">{getCollective(state, me.collectiveId ?? "")?.name ?? me.name}</h1>
       </div>
       <StatGrid items={[
-        { label: "Event mendatang", value: upcoming.length, hint: `${events.length} total` },
-        { label: "Tiket terjual", value: tickets.reduce((a, t) => a + t.pax, 0), hint: `${tickets.length} transaksi` },
-        { label: "Pendapatan tiket", value: rupiah(tickets.reduce((a, t) => a + t.price, 0)) },
-        { label: "Grup sofa aktif", value: groups.filter((g) => ACTIVE.includes(g.status)).length },
+        { label: "Event mendatang", value: events.filter((e) => e.status === "terbit" && state.now <= eventEnd(e)).length, hint: `${events.length} total` },
+        { label: "Pengajuan menunggu", value: pending },
+        { label: "Grup aktif", value: groups.filter((g) => ["DP_BOOKING", "PELUNASAN", "LUNAS"].includes(g.status)).length },
+        { label: "Dana bersih", value: rupiah(funds), hint: "lunas + hangus − refund" },
       ]} />
-      <section className="space-y-3">
-        <h2 className="text-sm">Event saya</h2>
-        {events.map((e) => {
-          const eg = groups.filter((g) => g.eventId === e.id);
-          const et = tickets.filter((t) => t.eventId === e.id);
-          return (
-            <div key={e.id} className="rounded-2xl border bg-card p-4 text-sm">
-              <Link to="/event/$id" params={{ id: e.id }} className="font-semibold">{e.title}</Link>
-              <p className="text-xs text-muted-foreground">{fmtEventDate(e.date)} · {getVenue(state, e.venueId)?.name}</p>
-              <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
-                <div className="rounded-lg bg-muted p-2">Tiket<br /><b>{et.reduce((a, t) => a + t.pax, 0)} org</b></div>
-                <div className="rounded-lg bg-muted p-2">Grup aktif<br /><b>{eg.filter((g) => ACTIVE.includes(g.status)).length}</b></div>
-                <div className="rounded-lg bg-muted p-2">Lunas<br /><b>{eg.filter((g) => g.status === "LUNAS" || g.status === "SELESAI").length}</b></div>
-              </div>
-              {e.cancelled ? <p className="mt-2 text-destructive">Dibatalkan</p> : state.now <= eventEnd(e) && (
-                <Button size="sm" variant="destructive" className="mt-3"
-                  onClick={() => confirm(`Batalkan ${e.title}? Semua grup akan batal dan dana dikembalikan.`) &&
-                    run("event.cancel", "Event dibatalkan", (d, u) => actions.cancelEvent(d, u, e.id))}>Batalkan event</Button>
-              )}
-            </div>
-          );
-        })}
-      </section>
+      <Tabs defaultValue={pending ? "pengajuan" : "event"}>
+        <TabsList className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-20 flex h-auto w-full justify-start gap-1 max-md:-mx-4 max-md:w-[calc(100%+2rem)] max-md:overflow-x-auto max-md:rounded-none max-md:bg-[#e4e4e9]/90 max-md:px-4 max-md:py-2 max-md:backdrop-blur-xl md:static md:flex-wrap md:justify-center [&>button]:shrink-0 max-md:[&>button]:h-9">
+          <TabsTrigger value="event">Event</TabsTrigger>
+          <TabsTrigger value="pengajuan">Pengajuan{pending ? ` (${pending})` : ""}</TabsTrigger>
+          <TabsTrigger value="grup">Grup</TabsTrigger>
+          <TabsTrigger value="referral">Referral</TabsTrigger>
+          <TabsTrigger value="rating">Rating</TabsTrigger>
+          <TabsTrigger value="dana">Dana</TabsTrigger>
+        </TabsList>
+        <TabsContent value="event" className="mt-4"><EventManager events={events} /></TabsContent>
+        <TabsContent value="pengajuan" className="mt-4"><ProposalList eventIds={ids} /></TabsContent>
+        <TabsContent value="grup" className="mt-4"><GroupList eventIds={ids} /></TabsContent>
+        <TabsContent value="referral" className="mt-4"><ReferralManager collectiveId={me.collectiveId} /></TabsContent>
+        <TabsContent value="rating" className="mt-4"><RatingReport eventIds={ids} /></TabsContent>
+        <TabsContent value="dana" className="mt-4"><FundsPanel events={events} /></TabsContent>
+      </Tabs>
     </div>
   );
 }
 
+/** VEN-01, VEN-02: host venue hanya melihat status booking sofa di venue-nya. */
 function VenueDash() {
-  const { state, me, run } = useApp();
-  const venues = state.venues.filter((v) => v.hostId === me.id);
-  const vids = new Set(venues.map((v) => v.id));
-  const sofas = state.sofas.filter((s) => vids.has(s.venueId));
-  const sids = new Set(sofas.map((s) => s.id));
-  const groups = state.groups.filter((g) => sids.has(g.sofaId));
-  const active = groups.filter((g) => ACTIVE.includes(g.status));
+  const { state, me } = useApp();
+  const venue = getVenue(state, me.venueId ?? "");
+  const events = state.events.filter((e) => e.venueId === me.venueId && e.status !== "draft").sort((a, b) => a.date.localeCompare(b.date));
+  const groups = state.groups.filter((g) => events.some((e) => e.id === g.eventId) && g.kind === "sofa");
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs text-muted-foreground">Dasbor Host Venue</p>
-        <h1 className="text-2xl">{me.name}</h1>
+        <p className="text-xs text-muted-foreground">Dasbor Host Venue · hanya lihat</p>
+        <h1 className="text-2xl">{venue?.name ?? me.name}</h1>
       </div>
       <StatGrid items={[
-        { label: "Sofa aktif", value: `${sofas.filter((s) => s.active).length}/${sofas.length}` },
-        { label: "Booking aktif", value: active.length },
-        { label: "Siap datang (lunas)", value: groups.filter((g) => g.status === "LUNAS").length },
-        { label: "Dana masuk", value: rupiah(groups.reduce((a, g) => a + groupPaid(g), 0)), hint: "simulasi" },
+        { label: "Event", value: events.length },
+        { label: "Sofa dalam proses", value: groups.filter((g) => g.status === "DP_BOOKING" || g.status === "PELUNASAN").length },
+        { label: "Sofa terbooking (lunas)", value: groups.filter((g) => g.status === "LUNAS" || g.status === "SELESAI").length },
+        { label: "Grup batal", value: groups.filter((g) => g.status === "BATAL").length },
       ]} />
-      <section className="rounded-2xl border bg-card p-4">
-        <h2 className="mb-2 text-sm">Booking sofa</h2>
-        {active.length === 0 && <p className="text-sm text-muted-foreground">Belum ada booking aktif.</p>}
-        {active.map((g) => (
-          <Link key={g.id} to="/grup/$id" params={{ id: g.id }} className="flex items-center justify-between py-2 text-sm">
-            <span>{getSofa(state, g.sofaId)?.name}
-              <span className="block text-xs text-muted-foreground">{getEvent(state, g.eventId)?.title} · {filledSlots(g)}/{g.slots} anggota</span></span>
-            <StatusBadge status={g.status} />
-          </Link>
-        ))}
-      </section>
-      {venues.map((v) => (
-        <section key={v.id} className="rounded-2xl border bg-card p-4">
-          <h2 className="mb-2 text-sm">Sofa di {v.name}</h2>
+      {events.map((e) => (
+        <section key={e.id} className="rounded-2xl border bg-card p-4">
+          <h2 className="text-sm">{e.title}</h2>
+          <p className="mb-2 text-xs text-muted-foreground">{fmtEventDate(e.date)} {e.time} WIB · {getCollective(state, e.collectiveId)?.name}{e.status === "batal" && " · BATAL"}</p>
           <ul className="divide-y text-sm">
-            {sofas.filter((s) => s.venueId === v.id).map((s) => (
-              <li key={s.id} className="flex items-center justify-between py-2">
-                <span>{s.name}<span className="block text-xs text-muted-foreground">{s.capacity} slot · {rupiah(s.price)}</span></span>
-                <Switch checked={s.active} onCheckedChange={() => run("sofa.manage", s.active ? "Sofa dinonaktifkan" : "Sofa diaktifkan", (d, u) => actions.toggleSofa(d, u, s.id))} />
-              </li>
-            ))}
+            {state.sofas.filter((s) => s.eventId === e.id).map((s) => {
+              const g = state.groups.find((x) => x.sofaId === s.id && x.status !== "BATAL") ?? state.groups.find((x) => x.sofaId === s.id);
+              return (
+                <li key={s.id} className="flex items-center justify-between py-2">
+                  <span>{s.name}<span className="block text-xs text-muted-foreground">{s.capacity} slot{g ? ` · ${filledSlots(g)}/${g.slots} anggota` : ""}</span></span>
+                  {g ? <StatusBadge status={g.status} /> : <span className="text-xs text-muted-foreground">Belum dijual lewat Sofamates</span>}
+                </li>
+              );
+            })}
           </ul>
         </section>
       ))}
+      {events.length === 0 && <p className="text-sm text-muted-foreground">Belum ada event di venue ini.</p>}
+      <p className="text-xs text-muted-foreground">Sofa berstatus Lunas sudah pasti terjual lewat Sofamates — jangan dijual lagi di venue. <Link to="/" className="text-primary">Lihat Home</Link></p>
     </div>
   );
 }

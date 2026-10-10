@@ -14,6 +14,8 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AkunRouteImport } from './routes/akun'
 import { Route as HostRouteImport } from './routes/host'
 import { Route as NotifikasiRouteImport } from './routes/notifikasi'
+import { Route as PartiesRouteImport } from './routes/parties'
+import { Route as PengajuanRouteImport } from './routes/pengajuan'
 import { Route as AkunIndexRouteImport } from './routes/akun.index'
 import { Route as AkunVerifikasiRouteImport } from './routes/akun.verifikasi'
 import { Route as EventIdRouteImport } from './routes/event.$id'
@@ -44,6 +46,16 @@ const NotifikasiRoute = NotifikasiRouteImport.update({
   path: '/notifikasi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PartiesRoute = PartiesRouteImport.update({
+  id: '/parties',
+  path: '/parties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PengajuanRoute = PengajuanRouteImport.update({
+  id: '/pengajuan',
+  path: '/pengajuan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AkunIndexRoute = AkunIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -71,6 +83,8 @@ export interface FileRoutesByFullPath {
   '/akun': typeof AkunRouteWithChildren
   '/host': typeof HostRoute
   '/notifikasi': typeof NotifikasiRoute
+  '/parties': typeof PartiesRoute
+  '/pengajuan': typeof PengajuanRoute
   '/akun/verifikasi': typeof AkunVerifikasiRoute
   '/event/$id': typeof EventIdRoute
   '/grup/$id': typeof GrupIdRoute
@@ -81,6 +95,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/host': typeof HostRoute
   '/notifikasi': typeof NotifikasiRoute
+  '/parties': typeof PartiesRoute
+  '/pengajuan': typeof PengajuanRoute
   '/akun/verifikasi': typeof AkunVerifikasiRoute
   '/event/$id': typeof EventIdRoute
   '/grup/$id': typeof GrupIdRoute
@@ -93,6 +109,8 @@ export interface FileRoutesById {
   '/akun': typeof AkunRouteWithChildren
   '/host': typeof HostRoute
   '/notifikasi': typeof NotifikasiRoute
+  '/parties': typeof PartiesRoute
+  '/pengajuan': typeof PengajuanRoute
   '/akun/verifikasi': typeof AkunVerifikasiRoute
   '/event/$id': typeof EventIdRoute
   '/grup/$id': typeof GrupIdRoute
@@ -106,6 +124,8 @@ export interface FileRouteTypes {
     | '/akun'
     | '/host'
     | '/notifikasi'
+    | '/parties'
+    | '/pengajuan'
     | '/akun/verifikasi'
     | '/event/$id'
     | '/grup/$id'
@@ -116,6 +136,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/host'
     | '/notifikasi'
+    | '/parties'
+    | '/pengajuan'
     | '/akun/verifikasi'
     | '/event/$id'
     | '/grup/$id'
@@ -127,6 +149,8 @@ export interface FileRouteTypes {
     | '/akun'
     | '/host'
     | '/notifikasi'
+    | '/parties'
+    | '/pengajuan'
     | '/akun/verifikasi'
     | '/event/$id'
     | '/grup/$id'
@@ -139,6 +163,8 @@ export interface RootRouteChildren {
   AkunRoute: typeof AkunRouteWithChildren
   HostRoute: typeof HostRoute
   NotifikasiRoute: typeof NotifikasiRoute
+  PartiesRoute: typeof PartiesRoute
+  PengajuanRoute: typeof PengajuanRoute
   EventIdRoute: typeof EventIdRoute
   GrupIdRoute: typeof GrupIdRoute
 }
@@ -178,6 +204,20 @@ declare module '@tanstack/react-router' {
       path: '/notifikasi'
       fullPath: '/notifikasi'
       preLoaderRoute: typeof NotifikasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parties': {
+      id: '/parties'
+      path: '/parties'
+      fullPath: '/parties'
+      preLoaderRoute: typeof PartiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pengajuan': {
+      id: '/pengajuan'
+      path: '/pengajuan'
+      fullPath: '/pengajuan'
+      preLoaderRoute: typeof PengajuanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/akun/': {
@@ -229,6 +269,8 @@ const rootRouteChildren: RootRouteChildren = {
   AkunRoute: AkunRouteWithChildren,
   HostRoute: HostRoute,
   NotifikasiRoute: NotifikasiRoute,
+  PartiesRoute: PartiesRoute,
+  PengajuanRoute: PengajuanRoute,
   EventIdRoute: EventIdRoute,
   GrupIdRoute: GrupIdRoute,
 }

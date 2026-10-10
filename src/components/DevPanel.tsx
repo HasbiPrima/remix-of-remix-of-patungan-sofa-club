@@ -1,13 +1,14 @@
-import { useState } from "react";
-import { Wrench } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { runScheduler, useApp } from "@/lib/store";
 import { fmtDate } from "@/lib/rules";
+import { AccountSwitcher } from "./AccountSwitcher";
 
-export function DevPanel() {
+/** Panel demo: ganti akun, majukan waktu, jalankan penjadwal. `trigger` = tombol pembuka. */
+export function DevPanel({ trigger }: { trigger: ReactNode }) {
   const { state, run, reset } = useApp();
   const [date, setDate] = useState("");
   const advance = (ms: number, label: string) =>
@@ -18,14 +19,14 @@ export function DevPanel() {
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <button aria-label="Panel dev" className="fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg md:bottom-6">
-          <Wrench className="h-5 w-5" />
-        </button>
-      </SheetTrigger>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader><SheetTitle className="font-display">Panel Dev</SheetTitle></SheetHeader>
-        <div className="mt-4 space-y-5 px-4 pb-8 text-sm">
+        <div className="mt-4 space-y-5 px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] text-sm">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Masuk sebagai (akun demo)</p>
+            <AccountSwitcher />
+          </div>
           <div className="rounded-xl bg-muted p-3">
             <p className="text-xs text-muted-foreground">Waktu simulasi</p>
             <p className="font-semibold">{fmtDate(state.now)}</p>
@@ -60,7 +61,7 @@ export function DevPanel() {
             run(null, "Penjadwal dijalankan", (d) => { n = runScheduler(d); });
             setTimeout(() => console.info(`scheduler changes: ${n}`), 0);
           }}>Jalankan penjadwal sekarang</Button>
-          <p className="text-xs text-muted-foreground">Penjadwal mengecek batas H-14 (DP), H-7 (pelunasan), H-3 (vote minuman) pukul 23.59 WIB, serta menandai grup selesai setelah event.</p>
+          <p className="text-xs text-muted-foreground">Penjadwal mengecek batas H-7 (DP) dan H-3 (pelunasan, vote, grup tiket) pukul 23.59 WIB, melepas slot yang ditahan lebih dari 30 menit, mengirim pengingat H-8, H-4, dan hari H, serta menandai grup selesai setelah event.</p>
           <Button variant="destructive" className="w-full" onClick={reset}>Reset data demo</Button>
         </div>
       </SheetContent>

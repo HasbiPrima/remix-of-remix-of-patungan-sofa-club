@@ -1,10 +1,14 @@
-import type { Group, Member } from "./types";
+import type { Group } from "./types";
+import { activeMembers, memberSlotCount } from "./rules";
 
-/** Slots per member (index-aligned with group.members). Legacy members without slot numbers get the first free slot deterministically. */
+export { memberSlotCount };
+
+/** Slots per active member (index-aligned with activeMembers(group)). Legacy members without slot numbers get the first free slot deterministically. */
 export function memberSlotList(group?: Group): number[][] {
   if (!group) return [];
-  const reserved = new Set(group.members.flatMap((m) => [...(m.slotNumber ? [m.slotNumber] : []), ...(m.extraSlots ?? [])]));
-  return group.members.map((member) => {
+  const members = activeMembers(group);
+  const reserved = new Set(members.flatMap((m) => [...(m.slotNumber ? [m.slotNumber] : []), ...(m.extraSlots ?? [])]));
+  return members.map((member) => {
     const extra = member.extraSlots ?? [];
     if (member.slotNumber) return [member.slotNumber, ...extra];
     for (let n = 1; n <= group.slots; n++) {
@@ -18,8 +22,7 @@ export function occupiedSlots(group?: Group): number[] {
   return memberSlotList(group).flat();
 }
 
-export const memberSlotCount = (m: Member) => 1 + (m.extraSlots?.length ?? 0);
-export const filledSlots = (g: Group) => g.members.reduce((a, m) => a + memberSlotCount(m), 0);
+export const filledSlots = (g: Group) => activeMembers(g).reduce((a, m) => a + memberSlotCount(m), 0);
 
 export function availableSlot(capacity: number, occupied: number[], selected?: number) {
   const slot = selected ?? Array.from({ length: capacity }, (_, i) => i + 1).find((n) => !occupied.includes(n));

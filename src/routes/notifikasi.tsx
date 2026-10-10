@@ -34,7 +34,7 @@ function NotifPage() {
         <div key={n.id} className={`rounded-2xl border p-3 text-sm ${n.read ? "bg-card" : "border-primary bg-primary/10"}`}>
           <p>{n.text}</p>
           <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-            <span>{fmtDate(n.at)}</span>
+            <span>{fmtDate(n.at)}{n.wa && " · terkirim juga via WhatsApp (simulasi)"}</span>
             {n.link && <Link to={n.link} className="text-primary">Lihat</Link>}
           </div>
         </div>

@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: "Unbounded", system-ui, sans-serif;
-  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -49,45 +49,58 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Nightclub palette: warm ink, acid lime, hot coral */
+/* Tema terang ala iOS 27: latar grup abu-abu, kartu putih, biru sistem sebagai warna utama,
+   bilah melayang dari "Liquid Glass" (kaca bening, kilau terang di atas, tepi sedikit gelap). */
 :root {
+  color-scheme: light;
   --radius: 0.9rem;
-  --background: oklch(0.16 0.012 60);
-  --foreground: oklch(0.96 0.01 90);
-  --card: oklch(0.21 0.014 60);
-  --card-foreground: oklch(0.96 0.01 90);
-  --popover: oklch(0.21 0.014 60);
-  --popover-foreground: oklch(0.96 0.01 90);
-  --primary: oklch(0.9 0.2 125);
-  --primary-foreground: oklch(0.18 0.02 125);
-  --secondary: oklch(0.27 0.016 60);
-  --secondary-foreground: oklch(0.96 0.01 90);
-  --muted: oklch(0.25 0.012 60);
-  --muted-foreground: oklch(0.7 0.02 80);
-  --accent: oklch(0.7 0.19 30);
-  --accent-foreground: oklch(0.16 0.02 30);
-  --destructive: oklch(0.63 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.78 0.16 155);
-  --warning: oklch(0.82 0.15 80);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.9 0.2 125);
-  --chart-1: oklch(0.9 0.2 125);
-  --chart-2: oklch(0.7 0.19 30);
-  --chart-3: oklch(0.78 0.16 155);
-  --chart-4: oklch(0.82 0.15 80);
-  --chart-5: oklch(0.65 0.1 230);
-  --sidebar: oklch(0.21 0.014 60);
-  --sidebar-foreground: oklch(0.96 0.01 90);
-  --sidebar-primary: oklch(0.9 0.2 125);
-  --sidebar-primary-foreground: oklch(0.18 0.02 125);
-  --sidebar-accent: oklch(0.27 0.016 60);
-  --sidebar-accent-foreground: oklch(0.96 0.01 90);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.9 0.2 125);
-  --gradient-glow: radial-gradient(120% 80% at 10% 0%, oklch(0.9 0.2 125 / 0.22), transparent 55%),
-    radial-gradient(90% 70% at 100% 10%, oklch(0.7 0.19 30 / 0.25), transparent 60%);
+  --background: #f2f2f7; /* systemGroupedBackground */
+  --foreground: #000000;
+  --card: rgb(255 255 255 / 0.6); /* kaca: tembus pandang, diburamkan di bawah */
+  --card-foreground: #000000;
+  --popover: rgb(255 255 255 / 0.8);
+  --popover-foreground: #000000;
+  --primary: #007aff; /* systemBlue */
+  --primary-foreground: #ffffff;
+  --secondary: rgb(118 118 128 / 0.12); /* tertiarySystemFill */
+  --secondary-foreground: #000000;
+  --muted: rgb(118 118 128 / 0.12);
+  --muted-foreground: rgb(60 60 67 / 0.62); /* secondaryLabel */
+  --accent: #d6265a; /* systemPink, digelapkan supaya terbaca sebagai teks */
+  --accent-foreground: #ffffff;
+  --destructive: #d70015; /* systemRed (kontras tinggi) */
+  --destructive-foreground: #ffffff;
+  --success: #248a3d; /* systemGreen (kontras tinggi) */
+  --warning: #b25000; /* systemOrange (kontras tinggi) */
+  --border: rgb(60 60 67 / 0.13); /* separator */
+  --input: rgb(60 60 67 / 0.18);
+  --ring: #007aff;
+  --chart-1: #007aff;
+  --chart-2: #d6265a;
+  --chart-3: #248a3d;
+  --chart-4: #b25000;
+  --chart-5: #5856d6;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #007aff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(118 118 128 / 0.12);
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: rgb(60 60 67 / 0.13);
+  --sidebar-ring: #007aff;
+  /* Liquid Glass */
+  --glass-fill: rgb(255 255 255 / 0.72);
+  --glass-highlight: rgb(255 255 255 / 0.9);
+  --glass-edge: rgb(0 0 0 / 0.09);
+  --glass-shadow: 0 8px 32px rgb(0 0 0 / 0.1), 0 1px 3px rgb(0 0 0 / 0.06);
+  /* Latar berwarna lembut di belakang kaca, supaya efek buram dan pembiasannya terlihat. */
+  --mesh: radial-gradient(42% 34% at 10% 6%, rgb(0 122 255 / 0.32), transparent 70%),
+    radial-gradient(38% 30% at 94% 16%, rgb(255 55 95 / 0.26), transparent 70%),
+    radial-gradient(46% 38% at 84% 82%, rgb(175 82 222 / 0.24), transparent 70%),
+    radial-gradient(46% 40% at 6% 80%, rgb(48 209 188 / 0.24), transparent 70%),
+    linear-gradient(180deg, #f5f6fb 0%, #eceff7 100%);
+  --gradient-glow: radial-gradient(90% 50% at 0% 0%, rgb(0 122 255 / 0.07), transparent 60%),
+    radial-gradient(70% 45% at 100% 0%, rgb(214 38 90 / 0.06), transparent 60%);
 }
 
 @layer base {
@@ -96,22 +109,50 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.022em; font-weight: 700; }
+  h2 { font-weight: 600; }
 }
 
-@utility bg-glow { background-image: var(--gradient-glow); }
-@utility font-display { font-family: var(--font-display); }
+@utility bg-glow { background-image: var(--gradient-glow); background-attachment: fixed; }
+@utility font-display { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.022em; }
+/* Bilah melayang Liquid Glass: kaca bening + kilau atas yang terang + tepi gelap tipis (iOS 27). */
+@utility glass {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), inset 0 0 0 0.5px var(--glass-edge), var(--glass-shadow);
+}
+@utility bg-mesh { background-image: var(--mesh); }
+
+/* Liquid Glass untuk semua permukaan (kartu, menu, popover). Di layer components supaya utility seperti shadow-* tetap bisa menimpa. */
+@layer components {
+  .bg-card, .bg-popover {
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgb(255 255 255 / 0.7);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.85), inset 0 0 0 0.5px rgb(0 0 0 / 0.04), 0 8px 28px rgb(31 38 135 / 0.07);
+  }
+}
+
+/* Pengguna yang memilih Kurangi Transparansi di HP: kaca menjadi pekat. */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --card: #ffffff; --popover: #ffffff; --glass-fill: rgb(255 255 255 / 0.97); }
+  .glass, .bg-card, .bg-popover { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
 @utility tag {
   display: inline-flex; align-items: center; gap: 0.25rem;
-  border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.7rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.04em;
+  border-radius: 999px; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0;
 }
 
-.sofa-floor { border: 2px solid var(--border); border-radius: 8px; padding: 16px; background: var(--background); }
-.sofa-stage { display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid var(--accent); color: var(--accent); padding: 14px 8px; font-size: 12px; font-weight: 700; }
+
+.sofa-floor { border: 1px solid rgb(255 255 255 / 0.7); border-radius: 22px; padding: 16px; background: var(--card); -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.85), 0 8px 28px rgb(31 38 135 / 0.07); }
+.sofa-stage { display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 14px; background: rgb(214 38 90 / 0.08); color: var(--accent); padding: 14px 8px; font-size: 12px; font-weight: 700; }
 .sofa-floor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 36px; padding: 24px 0; }
-.sofa-map-item { height: auto; min-height: 128px; padding: 12px 6px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--success); }
+.sofa-map-item { height: auto; min-height: 128px; padding: 12px 6px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgb(255 255 255 / 0.8); border-radius: 16px; color: var(--success); background: rgb(255 255 255 / 0.55); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 2px 8px rgb(31 38 135 / 0.05); }
 .sofa-map-item:hover { background: var(--muted); color: var(--success); }
 .sofa-map-code { display: flex; gap: 6px; align-items: center; font-size: 11px; }
 .sofa-shape { display: flex; width: 78px; height: 36px; border: 5px solid currentColor; border-bottom-width: 8px; border-radius: 6px; padding: 2px; gap: 2px; }
@@ -123,3 +164,15 @@
 .sofa-slot-selected, .sofa-slot-selected:hover { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
 .sofa-slot-occupied { border-color: var(--border); color: var(--muted-foreground); background: var(--muted); }
 @media (max-width: 420px) { .sofa-floor { padding: 12px; } .sofa-floor-grid { gap: 20px 16px; } }
+
+/* Tampilan aplikasi mobile */
+@media (max-width: 767px) {
+  html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: none; }
+  .max-md\:overflow-x-auto { scrollbar-width: none; }
+  .max-md\:overflow-x-auto::-webkit-scrollbar { display: none; }
+}
+@media (display-mode: standalone) {
+  body { user-select: none; }
+  input, textarea { user-select: text; }
+}
